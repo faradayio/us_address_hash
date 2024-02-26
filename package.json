@@ -1,5 +1,26 @@
 {
   "dependencies": {
     "numbers-from-words": "github:faradayio/numbers-from-words#assume-number-1"
-  }
+  },
+  "name": "us_address_hash",
+  "version": "0.0.1",
+  "description": "Open source javascript UDF for hashing addresses",
+  "main": "function.js",
+  "devDependencies": {
+    "vite": "^5.1.4"
+  },
+  "scripts": {
+    "test": "node run-tests.js",
+    "build": "vite build && node insert-function.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faradayio/us_address_hash.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/faradayio/us_address_hash/issues"
+  },
+  "homepage": "https://github.com/faradayio/us_address_hash#readme"
 }

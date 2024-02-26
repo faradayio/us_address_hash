@@ -1,6 +1,11 @@
 CREATE OR REPLACE FUNCTION functions.standardize_address(address STRING)
 RETURNS STRING
-LANGUAGE js AS """
+LANGUAGE js
+OPTIONS (
+  library=["gs://fdy-bigquery-public-udfs/numbers-from-words-0.0.8.js"]
+  )
+  
+AS """
   // note that slashes e.g. \\s must be doubled
   function removeSpecialCharactersAndExtraWhitespace(address) {
     return address.replace(/[^a-zA-Z0-9\\s]/g, " ").replace(/\\s+/g, " ");
@@ -95,11 +100,144 @@ LANGUAGE js AS """
     return address.replace(/ \\d{5}-\\d{4}$/g, "");
   }
 
+  const allNumbers = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
+    "hundred",
+    // Ordinals
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eighth",
+    "ninth",
+    "tenth",
+    "eleventh",
+    "twelfth",
+    "thirteenth",
+    "fourteenth",
+    "fifteenth",
+    "sixteenth",
+    "seventeenth",
+    "eighteenth",
+    "nineteenth",
+    "twentieth",
+    "thirtieth",
+    "fortieth",
+    "fiftieth",
+    "sixtieth",
+    "seventieth",
+    "eightieth",
+    "ninetieth",
+    "hundredth",
+  ];
+  const ordinalToCardinalMap = {
+    first: "one",
+    second: "two",
+    third: "three",
+    fourth: "four",
+    fifth: "five",
+    sixth: "six",
+    seventh: "seven",
+    eighth: "eight",
+    ninth: "nine",
+    tenth: "ten",
+    eleventh: "eleven",
+    twelfth: "twelve",
+    thirteenth: "thirteen",
+    fourteenth: "fourteen",
+    fifteenth: "fifteen",
+    sixteenth: "sixteen",
+    seventeenth: "seventeen",
+    eighteenth: "eighteen",
+    nineteenth: "nineteen",
+    twentieth: "twenty",
+    thirtieth: "thirty",
+    fortieth: "forty",
+    fiftieth: "fifty",
+    sixtieth: "sixty",
+    seventieth: "seventy",
+    eightieth: "eighty",
+    ninetieth: "ninety",
+    hundredth: "hundred",
+  };
+
+  function replaceNumberWordsWithNumerals(text) {
+    const words = text.split(/\\s+/);
+    let resultText = [];
+    let numberSequence = [];
+    let collectingNumber = false;
+    words.forEach((word) => {
+      let lowerCaseWord = word.toLowerCase().replace(/[^a-z]/gi, ""); // Remove punctuation for matching
+      // Check and replace ordinal numbers with their cardinal counterparts
+      if (ordinalToCardinalMap.hasOwnProperty(lowerCaseWord)) {
+        lowerCaseWord = ordinalToCardinalMap[lowerCaseWord];
+        word = lowerCaseWord; // Replace the word in the sequence with its cardinal counterpart
+      }
+      if (allNumbers.indexOf(lowerCaseWord) > -1) {
+        // Start or continue collecting a number sequence
+        numberSequence.push(word);
+        collectingNumber = true;
+      } else {
+        if (collectingNumber) {
+          // End of a number sequence, process it
+          const numericEquivalent = webpackNumbers.parse(
+            numberSequence.join(" ")
+          );
+          resultText.push(numericEquivalent);
+          numberSequence = []; // Reset for the next sequence
+          collectingNumber = false;
+        }
+        // If it's not part of a number, add it directly to the result
+        if (!collectingNumber) {
+          resultText.push(word);
+        }
+      }
+    });
+    // Handle case where text ends with a number sequence
+    if (collectingNumber) {
+      const numericEquivalent = webpackNumbers.parse(numberSequence.join(" "));
+      resultText.push(numericEquivalent);
+    }
+    return resultText.join(" ");
+  }
+
   address = address.toLowerCase();
   address = removeSpecialCharactersAndExtraWhitespace(address);
   address = standardizeDirectionalPrefixes(address);
   address = standardizeCommonTerms(address);
   address = standardizeStateNames(address);
   address = removeZipPlusFour(address);
+  address = replaceNumberWordsWithNumerals(address);
   return address.trim();
+
 """;

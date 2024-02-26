@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "numbers-from-words": "github:faradayio/numbers-from-words#assume-number-1"
+  }
+}

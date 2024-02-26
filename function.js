@@ -241,7 +241,7 @@ function standardizeAddress(address) {
   return address.trim();
 }
 
-// REMOVE THIS FOR BIGQUERY
+//! REMOVE THIS FOR BIGQUERY
 module.exports = {
   standardizeAddress,
 };

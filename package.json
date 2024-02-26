@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "vitest",
-    "build:bundle": "esbuild function.js --bundle --target=esnext --minify --outfile=dist/out.js",
+    "build:bundle": "esbuild function.js --bundle --format=cjs --legal-comments=inline --target=esnext --minify-whitespace --outfile=dist/out.js",
     "build": "npm run build:bundle && node insert-function.js"
   },
   "repository": {

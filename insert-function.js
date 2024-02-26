@@ -11,20 +11,17 @@ const sqlTemplateContent = fs.readFileSync(
 );
 
 const removedSqlContent = initialJsContent.replace(
-  /\/\/ REMOVE THIS FOR BIGQUERY.*/m,
+  /\/\/! REMOVE THIS FOR BIGQUERY[\s\S]*$/g,
   ""
 );
 
-const finalJsContent = (
-  removedSqlContent + "return standardizeAddress(address);"
-).replace(/\\/g, "\\\\");
+// i have to replace \ with \\ or bigquery won't accept
+const finalJsContent = removedSqlContent.replace(/\\/g, "\\\\");
 
 const finalSqlContent = sqlTemplateContent.replace(
   "PLACEHOLDER",
-  finalJsContent
+  finalJsContent + "return standardizeAddress(address);"
 );
-
-// FIXME i have to replace \ with \\ or bigquery won't accept
 
 fs.mkdirSync(path.join(__dirname, "dist"), { recursive: true });
 fs.writeFileSync(path.join(__dirname, "dist", "bigquery.sql"), finalSqlContent);

@@ -2,8 +2,18 @@ CREATE OR REPLACE FUNCTION functions.standardize_address(address STRING)
 RETURNS STRING
 LANGUAGE js
 OPTIONS (
-  library=["gs://fdy-bigquery-public-udfs/numbers-from-words-0.0.8.js"]
-  )
+  library=[
+    -- The following license applies ONLY to the numbers-from-words-0.0.8-assume-number-1.js UDF
+    -- The MIT License (MIT)
+    -- Copyright (c) 2015 bitfinexcom
+    -- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+    -- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+    -- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    -- thanks https://github.com/f3rno64/numbers-from-words
+    -- modified here https://github.com/faradayio/numbers-from-words/tree/assume-number-1
+    "gs://fdy-bigquery-public-udfs/numbers-from-words-0.0.8-assume-number-1.js"
+  ]
+)
   
 AS """
   // note that slashes e.g. \\s must be doubled
@@ -21,17 +31,18 @@ AS """
 
   function standardizeCommonTerms(address) {
     return address
-      .replace(/\\bstreet\\b/gi, "st")
-      .replace(/\\broad\\b/gi, "rd")
-      .replace(/\\btr(?:ai)l\\b/gi, "tr")
-      .replace(/\\blane\\b/gi, "ln")
-      .replace(/\\bavenue\\b/gi, "ave")
-      .replace(/\\bdrive\\b/gi, "dr")
-      .replace(/\\bfort\\b/gi, "ft")
-      .replace(/\\bapartment\\b/gi, "unit")
-      .replace(/\\b(apt|suite)\\b/gi, "unit")
-      .replace(/\\bste\\b/gi, "unit")
-      .replace(/\\bp\\.?\\s?o\\.?\\sbox\\b/gi, "pobox");
+      .replace(/\\b(apt|suite|apartment|ste)\\b/g, "unit")
+      .replace(/\\bavenue\\b/g, "ave")
+      .replace(/\\bcourt\\b/g, "ct")
+      .replace(/\\bdrive\\b/g, "dr")
+      .replace(/\\bfort\\b/g, "ft")
+      .replace(/\\blane\\b/g, "ln")
+      .replace(/\\bp\\.?\\s?o\\.?\\sbox\\b/g, "pobox")
+      .replace(/\\bplace\\b/g, "pl")
+      .replace(/\\broad\\b/g, "rd")
+      .replace(/\\bstreet\\b/g, "st")
+      .replace(/\\bterrace\\b/g, "tr")
+      .replace(/\\btr(?:ai)l\\b/g, "trl");
   }
 
   function standardizeStateNames(address) {
@@ -197,13 +208,11 @@ AS """
     let numberSequence = [];
     let collectingNumber = false;
     words.forEach((word) => {
-      let lowerCaseWord = word.toLowerCase().replace(/[^a-z]/gi, ""); // Remove punctuation for matching
       // Check and replace ordinal numbers with their cardinal counterparts
-      if (ordinalToCardinalMap.hasOwnProperty(lowerCaseWord)) {
-        lowerCaseWord = ordinalToCardinalMap[lowerCaseWord];
-        word = lowerCaseWord; // Replace the word in the sequence with its cardinal counterpart
+      if (ordinalToCardinalMap.hasOwnProperty(word)) {
+        word = ordinalToCardinalMap[word]; // Replace the word in the sequence with its cardinal counterpart
       }
-      if (allNumbers.indexOf(lowerCaseWord) > -1) {
+      if (allNumbers.indexOf(word) > -1) {
         // Start or continue collecting a number sequence
         numberSequence.push(word);
         collectingNumber = true;

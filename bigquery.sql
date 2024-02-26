@@ -1,4 +1,4 @@
-CREATE TEMP FUNCTION StandardizeAddress(address STRING)
+CREATE OR REPLACE FUNCTION functions.standardize_address(address STRING)
 RETURNS STRING
 LANGUAGE js AS """
   // note that slashes e.g. \\s must be doubled
@@ -17,7 +17,12 @@ LANGUAGE js AS """
   function standardizeCommonTerms(address) {
     return address
       .replace(/\\bstreet\\b/gi, "st")
+      .replace(/\\broad\\b/gi, "rd")
+      .replace(/\\btr(?:ai)l\\b/gi, "tr")
+      .replace(/\\blane\\b/gi, "ln")
       .replace(/\\bavenue\\b/gi, "ave")
+      .replace(/\\bdrive\\b/gi, "dr")
+      .replace(/\\bfort\\b/gi, "ft")
       .replace(/\\bapartment\\b/gi, "unit")
       .replace(/\\b(apt|suite)\\b/gi, "unit")
       .replace(/\\bste\\b/gi, "unit")
@@ -26,57 +31,57 @@ LANGUAGE js AS """
 
   function standardizeStateNames(address) {
     const states = {
-      alabama: "AL",
-      alaska: "AK",
-      arizona: "AZ",
-      arkansas: "AR",
-      california: "CA",
-      colorado: "CO",
-      connecticut: "CT",
-      delaware: "DE",
-      florida: "FL",
-      georgia: "GA",
-      hawaii: "HI",
-      idaho: "ID",
-      illinois: "IL",
-      indiana: "IN",
-      iowa: "IA",
-      kansas: "KS",
-      kentucky: "KY",
-      louisiana: "LA",
-      maine: "ME",
-      maryland: "MD",
-      massachusetts: "MA",
-      michigan: "MI",
-      minnesota: "MN",
-      mississippi: "MS",
-      missouri: "MO",
-      montana: "MT",
-      nebraska: "NE",
-      nevada: "NV",
-      "new hampshire": "NH",
-      "new jersey": "NJ",
-      "new mexico": "NM",
-      "new york": "NY",
-      "north carolina": "NC",
-      "north dakota": "ND",
-      ohio: "OH",
-      oklahoma: "OK",
-      oregon: "OR",
-      pennsylvania: "PA",
-      "rhode island": "RI",
-      "south carolina": "SC",
-      "south dakota": "SD",
-      tennessee: "TN",
-      texas: "TX",
-      utah: "UT",
-      vermont: "VT",
-      virginia: "VA",
-      washington: "WA",
-      "west virginia": "WV",
-      wisconsin: "WI",
-      wyoming: "WY",
-      "puerto rico": "PR",
+      alabama: "al",
+      alaska: "ak",
+      arizona: "az",
+      arkansas: "ar",
+      california: "ca",
+      colorado: "co",
+      connecticut: "ct",
+      delaware: "de",
+      florida: "fl",
+      georgia: "ga",
+      hawaii: "hi",
+      idaho: "id",
+      illinois: "il",
+      indiana: "in",
+      iowa: "ia",
+      kansas: "ks",
+      kentucky: "ky",
+      louisiana: "la",
+      maine: "me",
+      maryland: "md",
+      massachusetts: "ma",
+      michigan: "mi",
+      minnesota: "mn",
+      mississippi: "ms",
+      missouri: "mo",
+      montana: "mt",
+      nebraska: "ne",
+      nevada: "nv",
+      "new hampshire": "nh",
+      "new jersey": "nj",
+      "new mexico": "nm",
+      "new york": "ny",
+      "north carolina": "nc",
+      "north dakota": "nd",
+      ohio: "oh",
+      oklahoma: "ok",
+      oregon: "or",
+      pennsylvania: "pa",
+      "rhode island": "ri",
+      "south carolina": "sc",
+      "south dakota": "sd",
+      tennessee: "tn",
+      texas: "tx",
+      utah: "ut",
+      vermont: "vt",
+      virginia: "va",
+      washington: "wa",
+      "west virginia": "wv",
+      wisconsin: "wi",
+      wyoming: "wy",
+      "puerto rico": "pr",
     };
     for ([key, value] of Object.entries(states)) {
       const regex = new RegExp("\\\\b" + key + "\\\\b", "g");

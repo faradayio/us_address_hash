@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const functionJsContent = fs.readFileSync(
-  path.join(__dirname, "function.js"),
+const initialJsContent = fs.readFileSync(
+  path.join(__dirname, "dist", "out.js"),
   "utf8"
 );
 const sqlTemplateContent = fs.readFileSync(
@@ -10,10 +10,21 @@ const sqlTemplateContent = fs.readFileSync(
   "utf8"
 );
 
-const finalSqlContent = sqlTemplateContent
-  .replace("PLACEHOLDER", functionJsContent)
-  .replace(/import { parse } from "numbers-from-words";\n/, "")
-  .replace(/parse\(/g, "webpackNumbers.parse(");
+const removedSqlContent = initialJsContent.replace(
+  /\/\/ REMOVE THIS FOR BIGQUERY.*/m,
+  ""
+);
+
+const finalJsContent = (
+  removedSqlContent + "return standardizeAddress(address);"
+).replace(/\\/g, "\\\\");
+
+const finalSqlContent = sqlTemplateContent.replace(
+  "PLACEHOLDER",
+  finalJsContent
+);
+
+// FIXME i have to replace \ with \\ or bigquery won't accept
 
 fs.mkdirSync(path.join(__dirname, "dist"), { recursive: true });
 fs.writeFileSync(path.join(__dirname, "dist", "bigquery.sql"), finalSqlContent);

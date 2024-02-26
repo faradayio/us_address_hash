@@ -1,39 +1,36 @@
-//import { parse } from "numbers-from-words";
-//SyntaxError: Cannot use import statement outside a module
-
 import { parse } from "numbers-from-words";
 
-// FIXME it would be nice if this was de-duplicated with the one in the
-// bigquery.sql
-// and i could just run "npm test"
-
-// note that slashes e.g. \\s must be doubled
+// note that slashes e.g. \s must be doubled
 function removeSpecialCharactersAndExtraWhitespace(address) {
-  return address.replace(/[^a-zA-Z0-9\\s]/g, " ").replace(/\\s+/g, " ");
+  return address.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
 }
 
-function standardizeDirectionalPrefixes(address) {
-  return address.replace(
-    /\\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?\\b/gi,
-    (match, n, s, e, w, e1, w1) =>
-      (n || "") + (s || "") + (e || e1 || "") + (w || w1 || "")
-  );
-}
+// function standardizeDirectionalPrefixes(address) {
+//   return address.replace(
+//     /\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?\b/gi,
+//     (match, n, s, e, w, e1, w1) =>
+//       (n || "") + (s || "") + (e || e1 || "") + (w || w1 || "")
+//   );
+// }
 
 function standardizeCommonTerms(address) {
   return address
-    .replace(/\\b(apt|suite|apartment|ste)\\b/g, "unit")
-    .replace(/\\bavenue\\b/g, "ave")
-    .replace(/\\bcourt\\b/g, "ct")
-    .replace(/\\bdrive\\b/g, "dr")
-    .replace(/\\bfort\\b/g, "ft")
-    .replace(/\\blane\\b/g, "ln")
-    .replace(/\\bp\\.?\\s?o\\.?\\sbox\\b/g, "pobox")
-    .replace(/\\bplace\\b/g, "pl")
-    .replace(/\\broad\\b/g, "rd")
-    .replace(/\\bstreet\\b/g, "st")
-    .replace(/\\bterrace\\b/g, "tr")
-    .replace(/\\btr(?:ai)l\\b/g, "trl");
+    .replace(/\b(apt|suite|apartment|ste)\b/g, "unit")
+    .replace(/\bavenue\b/g, "ave")
+    .replace(/\bcourt\b/g, "ct")
+    .replace(/\bdrive\b/g, "dr")
+    .replace(/\bfort\b/g, "ft")
+    .replace(/\blane\b/g, "ln")
+    .replace(/\bp\.?\s?o\.?\sbox\b/g, "pobox")
+    .replace(/\bplace\b/g, "pl")
+    .replace(/\broad\b/g, "rd")
+    .replace(/\bstreet\b/g, "st")
+    .replace(/\bterrace\b/g, "tr")
+    .replace(/\btr(?:ai)l\b/g, "trl")
+    .replace(/\bnorth\b/g, "n")
+    .replace(/\bsouth\b/g, "s")
+    .replace(/\beast\b/g, "e")
+    .replace(/\bwest\b/g, "w");
 }
 
 function standardizeStateNames(address) {
@@ -90,8 +87,8 @@ function standardizeStateNames(address) {
     wyoming: "wy",
     "puerto rico": "pr",
   };
-  for ([key, value] of Object.entries(states)) {
-    const regex = new RegExp("\\\\b" + key + "\\\\b", "g");
+  for (const [key, value] of Object.entries(states)) {
+    const regex = new RegExp("\\b" + key + "\\b", "g");
     address = address.replace(regex, value);
   }
 
@@ -99,7 +96,11 @@ function standardizeStateNames(address) {
 }
 
 function removeZipPlusFour(address) {
-  return address.replace(/ \\d{5}-\\d{4}$/g, "");
+  return address.replace(/ \d{5}-\d{4}$/g, "");
+}
+
+function removeOrdinalSuffixes(address) {
+  return address.replace(/\b(\d+)(st|nd|rd|th)\b/g, "$1");
 }
 
 const allNumbers = [
@@ -194,7 +195,7 @@ const ordinalToCardinalMap = {
 };
 
 function replaceNumberWordsWithNumerals(text) {
-  const words = text.split(/\\s+/);
+  const words = text.split(/\s+/);
   let resultText = [];
   let numberSequence = [];
   let collectingNumber = false;
@@ -232,7 +233,7 @@ function replaceNumberWordsWithNumerals(text) {
 function standardizeAddress(address) {
   address = address.toLowerCase();
   address = removeSpecialCharactersAndExtraWhitespace(address);
-  address = standardizeDirectionalPrefixes(address);
+  address = removeOrdinalSuffixes(address);
   address = standardizeCommonTerms(address);
   address = standardizeStateNames(address);
   address = removeZipPlusFour(address);
@@ -240,4 +241,7 @@ function standardizeAddress(address) {
   return address.trim();
 }
 
-console.log(standardizeAddress("160 4th ave chula vista ca"));
+// REMOVE THIS FOR BIGQUERY
+module.exports = {
+  standardizeAddress,
+};

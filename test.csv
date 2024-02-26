@@ -1,0 +1,4 @@
+input,expected_output
+123 north blount street,123 n blount st
+160 4th avenue chula vista ca,160 4 ave chula vista ca
+123 northwest foobar,123 nw foobar

@@ -1,0 +1,6 @@
+CREATE OR REPLACE FUNCTION functions.standardize_address(address STRING)
+RETURNS STRING
+LANGUAGE js
+AS """
+PLACEHOLDER
+""";

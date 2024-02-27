@@ -5,32 +5,40 @@ function removeSpecialCharactersAndExtraWhitespace(address) {
   return address.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
 }
 
-// function standardizeDirectionalPrefixes(address) {
-//   return address.replace(
-//     /\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?\b/gi,
-//     (match, n, s, e, w, e1, w1) =>
-//       (n || "") + (s || "") + (e || e1 || "") + (w || w1 || "")
-//   );
-// }
+function standardizeDirectionalPrefixes(address) {
+  return address.replace(
+    /\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?\b/gi,
+    (match, n, s, e, w, e1, w1) =>
+      (n || "") + (s || "") + (e || e1 || "") + (w || w1 || "")
+  );
+}
 
 function standardizeCommonTerms(address) {
-  return address
-    .replace(/\b(apt|suite|apartment|ste)\b/g, "unit")
-    .replace(/\bavenue\b/g, "ave")
-    .replace(/\bcourt\b/g, "ct")
-    .replace(/\bdrive\b/g, "dr")
-    .replace(/\bfort\b/g, "ft")
-    .replace(/\blane\b/g, "ln")
-    .replace(/\bp\.?\s?o\.?\sbox\b/g, "pobox")
-    .replace(/\bplace\b/g, "pl")
-    .replace(/\broad\b/g, "rd")
-    .replace(/\bstreet\b/g, "st")
-    .replace(/\bterrace\b/g, "tr")
-    .replace(/\btr(?:ai)l\b/g, "trl")
-    .replace(/\bnorth\b/g, "n")
-    .replace(/\bsouth\b/g, "s")
-    .replace(/\beast\b/g, "e")
-    .replace(/\bwest\b/g, "w");
+  return (
+    address
+      .replace(/\b(?:apt|suite|apartment|ste|spc?)\b/g, "unit")
+      .replace(/\bavenue\b/g, "ave")
+      .replace(/\bplanes?\b/g, "pl")
+      .replace(/\bridge?\b/g, "rdg")
+      // .replace(/\b(\d+)-(\d+)\b/g, "$1$2")
+      .replace(/\bcourt\b/g, "ct")
+      .replace(/\bgreen\b/g, "grn")
+      .replace(/\b(?:passage|psge)\b/g, "psg")
+      .replace(/\bdrive\b/g, "dr")
+      .replace(/\bfort\b/g, "ft")
+      .replace(/\blane\b/g, "ln")
+      .replace(/\bcircle\b/g, "cir")
+      .replace(/\bp\.?\s?o\.?\sbox\b/g, "pobox")
+      .replace(/\bplace\b/g, "pl")
+      .replace(/\broad\b/g, "rd")
+      .replace(/\bboulevard\b/g, "blvd")
+      .replace(/\b(?:parkway|pkway)\b/g, "pkwy")
+      .replace(/\bstreet\b/g, "st")
+      .replace(/\bter(?:race)?\b/g, "tr")
+      .replace(/\bsaint\b/g, "st")
+      .replace(/\b(?:us)? ?(?:hwy|highway|route)\b/g, "rt")
+      .replace(/\btr(?:ai)l\b/g, "trl")
+  );
 }
 
 function standardizeStateNames(address) {
@@ -234,6 +242,7 @@ function standardizeAddress(address) {
   address = address.toLowerCase();
   address = removeSpecialCharactersAndExtraWhitespace(address);
   address = removeOrdinalSuffixes(address);
+  address = standardizeDirectionalPrefixes(address);
   address = standardizeCommonTerms(address);
   address = standardizeStateNames(address);
   address = removeZipPlusFour(address);

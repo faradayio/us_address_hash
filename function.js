@@ -141,6 +141,7 @@ const allNumbers = [
   "eighty",
   "ninety",
   "hundred",
+  "thousand",
   // Ordinals
   "first",
   "second",
@@ -241,12 +242,12 @@ function replaceNumberWordsWithNumerals(text) {
 function standardizeAddress(address) {
   address = address.toLowerCase();
   address = removeSpecialCharactersAndExtraWhitespace(address);
+  address = replaceNumberWordsWithNumerals(address);
   address = removeOrdinalSuffixes(address);
   address = standardizeDirectionalPrefixes(address);
   address = standardizeCommonTerms(address);
   address = standardizeStateNames(address);
   address = removeZipPlusFour(address);
-  address = replaceNumberWordsWithNumerals(address);
   return address.trim();
 }
 

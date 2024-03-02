@@ -2,3 +2,7 @@ input,expected_output
 123 north blount street,123 n blount st
 160 4th avenue chula vista ca,160 4 ave chula vista ca
 123 northwest foobar,123 nw foobar
+nine one foobar,91 foobar
+two ninety nine foobar,299 foobar
+two thousand forty seven foo,2047 foo
+two thousand foo,2000 foo

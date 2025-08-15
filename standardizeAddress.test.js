@@ -7,9 +7,11 @@ import csv from "neat-csv";
 const csvData = fs.readFileSync(path.join(__dirname, "test.csv"), "utf8");
 const rows = await csv(csvData);
 for (const row of rows) {
-  test(`standardizeAddress(${row.input})`, () => {
-    const result = standardizeAddress(row.input);
-    expect(result).toEqual(row.expected_output);
+  if (row.skip === "y") {
+    continue;
+  }
+  test(`${row.a} ~ ${row.b}`, () => {
+    expect(standardizeAddress(row.a)).toEqual(standardizeAddress(row.b));
   });
 }
 

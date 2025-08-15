@@ -1,8 +1,24 @@
-input,expected_output
-123 north blount street,123 n blount st
-160 4th avenue chula vista ca,160 4 ave chula vista ca
-123 northwest foobar,123 nw foobar
-nine one foobar,91 foobar
-two ninety nine foobar,299 foobar
-two thousand forty seven foo,2047 foo
-two thousand foo,2000 foo
+skip,a,b
+,123 north blount street,123 n blount st
+,160 4th avenue,160 4 ave
+,123 northwest foobar,123 nw foobar
+,nine one foobar,91 foobar
+,two ninety nine foobar,299 foobar
+,two thousand forty seven foo,2047 foo
+,two thousand foo,2000 foo
+,860 ROSS LN N,860 ROSS LN
+,4729 S Pacific Hwy #4,4729 S PACIFIC HWY UNIT 4
+,1241 DOWELL RD SPC 39,1241 Dowell Rd Space 39
+,96 PARK AVE APT 207,96 Park Ave #207
+,1065 w 7 st,1065 w 7
+,718 se32 ND ave,718 SE 32ND AVE
+,221 TWIN OAKS LOOP,221 Twin Oaks Ln
+,222 SHADYWOOD DR,222 Shady Wood Dr
+,1360 Circlewood Dr,1360 CIRCLE WOOD DR
+,3115 FARM TO MARKET RD,3115 FARM TO MKT RD
+,7905 AJAX ST,7905 Ajax Ave
+,967 SE FORMOSA GDNS,967 SE Formosa Gardens
+,900 University St Apt18MN,900 UNIVERSITY ST APT 18MN
+,500 UMSTEAD DR APT D105,500 Umstead Dr Apt 105D
+,1935 PAINTER ST,1935 Painter
+,3421 MCDOUGAL ST,3421 Mcdougal Ave

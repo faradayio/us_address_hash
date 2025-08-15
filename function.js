@@ -1,44 +1,51 @@
 import { parse } from "numbers-from-words";
 
-// note that slashes e.g. \s must be doubled
-function removeSpecialCharactersAndExtraWhitespace(address) {
-  return address.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ");
-}
-
 function standardizeDirectionalPrefixes(address) {
   return address.replace(
-    /\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?\b/gi,
-    (match, n, s, e, w, e1, w1) =>
-      (n || "") + (s || "") + (e || e1 || "") + (w || w1 || "")
+    /\b(?:(n)(?:orth)?|(s)(?:outh)?|(e)(?:ast)?|(w)(?:est)?)(?: ?(e)(?:ast)?| ?(w)(?:est)?)?(\d+)?\b/gi,
+    (match, n, s, e, w, e1, w1, d) =>
+      (n || "") +
+      (s || "") +
+      (e || e1 || "") +
+      (w || w1 || "") +
+      (d ? ` ${d}` : "")
   );
+}
+
+function standardizeUnitNumber(address) {
+  return address
+    .replace(
+      /\b(\d+)?(?:apt|suite|apartment|ste|spc?|space)(?:(\d+)|\b)/g,
+      " unit $1$2"
+    )
+    .replace(/\b([a-z])(\d+)\b/, "$2$1")
+    .replace(/\#/g, " unit ");
 }
 
 function standardizeCommonTerms(address) {
-  return (
-    address
-      .replace(/\b(?:apt|suite|apartment|ste|spc?)\b/g, "unit")
-      .replace(/\bavenue\b/g, "ave")
-      .replace(/\bplanes?\b/g, "pl")
-      .replace(/\bridge?\b/g, "rdg")
-      // .replace(/\b(\d+)-(\d+)\b/g, "$1$2")
-      .replace(/\bcourt\b/g, "ct")
-      .replace(/\bgreen\b/g, "grn")
-      .replace(/\b(?:passage|psge)\b/g, "psg")
-      .replace(/\bdrive\b/g, "dr")
-      .replace(/\bfort\b/g, "ft")
-      .replace(/\blane\b/g, "ln")
-      .replace(/\bcircle\b/g, "cir")
-      .replace(/\bp\.?\s?o\.?\sbox\b/g, "pobox")
-      .replace(/\bplace\b/g, "pl")
-      .replace(/\broad\b/g, "rd")
-      .replace(/\bboulevard\b/g, "blvd")
-      .replace(/\b(?:parkway|pkway)\b/g, "pkwy")
-      .replace(/\bstreet\b/g, "st")
-      .replace(/\bter(?:race)?\b/g, "tr")
-      .replace(/\bsaint\b/g, "st")
-      .replace(/\b(?:us)? ?(?:hwy|highway|route)\b/g, "rt")
-      .replace(/\btr(?:ai)l\b/g, "trl")
-  );
+  return address
+    .replace(/ ?pl(?:anes)?\b/g, " pl")
+    .replace(/ ?(?:ridge|rdg)s?\b/g, " rdg")
+    .replace(/ ?(?:garden|gdn)s?\b/g, " garden")
+    .replace(/ ?market?\b/g, " mkt")
+    .replace(/ ?greens?\b/g, " grn")
+    .replace(/ ?woods?\b/g, " wood")
+    .replace(/\b(?:passage|psge)\b/g, " psg")
+    .replace(/\bfort\b/g, " ft")
+    .replace(/\bp\.?\s?o\.?\sbox\b/g, " pobox")
+    .replace(/\bsaint\b/g, " st");
+}
+
+function standardizeStreetSuffixes(address) {
+  return address
+    .replace(
+      /\b(?:avenue|ave|court|ct|drive|dr|lane|ln|circle|cir|place|pl|loop|lp|road|rd|boulevard|blvd|parkway|pkway|pkwy|street|st|ter(?:race)|tr|(?:us)?\s*(?:hwy|highway|route)|tr(?:ai)l|trl)\s+unit\b/g,
+      " street unit"
+    )
+    .replace(
+      /\b(?:avenue|ave|court|ct|drive|dr|lane|ln|circle|cir|place|pl|loop|lp|road|rd|boulevard|blvd|parkway|pkway|pkwy|street|st|ter(?:race)|tr|(?:us)?\s*(?:hwy|highway|route)|tr(?:ai)l|trl)(?:\s*|\s*(?:n|e|w|s))$/g,
+      " street"
+    );
 }
 
 function standardizeStateNames(address) {
@@ -107,8 +114,12 @@ function removeZipPlusFour(address) {
   return address.replace(/ \d{5}-\d{4}$/g, "");
 }
 
+function removeTrailingStuff(address) {
+  return address.replace(/ (?:street)? ?(?:n|s|e|w)?$/g, "");
+}
+
 function removeOrdinalSuffixes(address) {
-  return address.replace(/\b(\d+)(st|nd|rd|th)\b/g, "$1");
+  return address.replace(/\b(\d+) ?(st|nd|rd|th)\b/g, "$1");
 }
 
 const allNumbers = [
@@ -241,13 +252,28 @@ function replaceNumberWordsWithNumerals(text) {
 
 function standardizeAddress(address) {
   address = address.toLowerCase();
-  address = removeSpecialCharactersAndExtraWhitespace(address);
+  // console.log("address.toLowerCase() " + address);
+  address = address.replace(/[^a-zA-Z0-9\s#]/g, " ");
+  // console.log('address.replace(/[^a-zA-Z0-9s#]/g, " ") ' + address);
   address = replaceNumberWordsWithNumerals(address);
-  address = removeOrdinalSuffixes(address);
+  // console.log("replaceNumberWordsWithNumerals(address) " + address);
   address = standardizeDirectionalPrefixes(address);
+  // console.log("standardizeDirectionalPrefixes(address) " + address);
+  address = standardizeUnitNumber(address);
+  // console.log("standardizeUnitNumber(address) " + address);
+  address = standardizeStreetSuffixes(address);
+  // console.log("standardizeStreetSuffixes(address) " + address);
   address = standardizeCommonTerms(address);
+  // console.log("standardizeCommonTerms(address) " + address);
   address = standardizeStateNames(address);
+  // console.log("standardizeStateNames(address) " + address);
   address = removeZipPlusFour(address);
+  // console.log("removeZipPlusFour(address) " + address);
+  address = removeOrdinalSuffixes(address);
+  // console.log("removeOrdinalSuffixes(address) " + address);
+  address = removeTrailingStuff(address);
+  // console.log("removeTrailingStuff(address) " + address);
+  address = address.replace(/\s+/g, " ");
   return address.trim();
 }
 

@@ -25,3 +25,7 @@ const finalSqlContent = sqlTemplateContent.replace(
 
 fs.mkdirSync(path.join(__dirname, "dist"), { recursive: true });
 fs.writeFileSync(path.join(__dirname, "dist", "bigquery.sql"), finalSqlContent);
+
+console.log(
+  "Build complete! Check dist/bigquery.sql for the final BigQuery function."
+);
